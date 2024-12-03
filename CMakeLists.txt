@@ -1,21 +1,18 @@
-﻿# CMakeList.txt : CMake project for magnesium, include source and define
-# project specific logic here.
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.29)
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+project(magnesium VERSION 0.1.0
+                  DESCRIPTION "Personal utility library."
+                  LANGUAGES CXX)
+
+set(HEADER_LIST
+    "include/mg/functional.hpp"
+    "include/mg/detail/iter_n.hpp")
+add_library(magnesium INTERFACE ${HEADER_LIST})
+target_include_directories(magnesium INTERFACE "include")
+
+# Actions to take only if this is the main project being built.
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    target_compile_features(magnesium INTERFACE cxx_std_20)
+    set_target_properties(magnesium PROPERTIES CXX_EXTENSIONS OFF)
+    add_subdirectory(tests)
 endif()
-
-project ("magnesium")
-
-# Add source to this project's executable.
-add_executable (magnesium "magnesium.cpp" "magnesium.h")
-
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET magnesium PROPERTY CXX_STANDARD 20)
-endif()
-
-# TODO: Add tests and install targets if needed.
