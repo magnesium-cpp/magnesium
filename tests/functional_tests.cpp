@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <mg/functional.hpp>
-#include <mg/detail/iter_n.hpp>
 
 TEST(iter_n_test, stride_1) {
     int sum = 0;

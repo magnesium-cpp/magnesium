@@ -6,6 +6,8 @@ project(magnesium VERSION 0.1.0
 
 set(HEADER_LIST
     "include/mg/functional.hpp"
+    "include/mg/types.hpp"
+    "include/mg/detail/is_instance.hpp"
     "include/mg/detail/iter_n.hpp")
 add_library(magnesium INTERFACE ${HEADER_LIST})
 target_include_directories(magnesium INTERFACE "include")
