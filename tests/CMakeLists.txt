@@ -11,6 +11,7 @@ FetchContent_MakeAvailable(gtest)
 
 set(SRC_LIST
     "functional_tests.cpp"
+    "math_tests.cpp"
     "types_tests.cpp")
 
 add_executable(magnesium_test ${SRC_LIST})
