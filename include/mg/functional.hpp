@@ -31,6 +31,27 @@ namespace mg
     };
 
     /// <summary>
+    /// A functor that always provides a template injected constant. The functor is defined so that
+    /// it can be called with any arguments and will always provide the same constant.
+    /// </summary>
+    /// <typeparam name="C">The template injected constant.</typeparam>
+    template <auto C>
+    struct constant_func
+    {
+        /// <summary>
+        /// Return the injected constant. Independent of any specific signature.
+        /// </summary>
+        /// <typeparam name="...Ts">The types of the arguments.</typeparam>
+        /// <param name="...p_ts">The arguments that were passed to the function (but are not considered in anyway).</param>
+        /// <returns>The injected constant by value.</returns>
+        template <typename... Ts>
+        decltype(C) operator()(Ts&&... p_ts) const noexcept
+        {
+            return C;
+        }
+    };
+
+    /// <summary>
     /// Iterate over a parameter pack with a fixed stride size. The number of parameters must be
     /// evenly divisible by the stride size else there will be a compilation error. 0 is considered
     /// evenly divisible by any stride size.

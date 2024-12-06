@@ -5,12 +5,12 @@ Examples of the utilities provided by the library are provided below.
 ### std::tuple
 - map
 - zip
-- runtime indexed operations
+- ~~runtime indexed operations~~ Currently in progress
 
 ### functional
 - chunk variadic parameters by some constant (provides for-loop like functionality and avoids tedious recursive formulation)
-- functor which provides template provided constant when called
 - functor which wraps template valid callable
+- ~~functor which provides template provided constant when called~~
 
 ### types
 - check if a type is an implementation of a templated class (whose template only takes type parameters)
