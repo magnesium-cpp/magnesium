@@ -10,14 +10,14 @@ Examples of the utilities provided by the library are provided below.
 ### functional
 - chunk variadic parameters by some constant (provides for-loop like functionality and avoids tedious recursive formulation)
 - functor which wraps template valid callable
-- ~~functor which provides template provided constant when called~~
+- functor which provides template provided constant when called
 
 ### types
 - check if a type is an implementation of a templated class (whose template only takes type parameters)
 
 ### error handling
-- terse error handling 
-- resilient retry of a flaky operation
+- ~~terse error handling~~ currently implementing
+- ~~resilient retry of a flaky operation~~ currently implementing
 
 Other examples that I would like to add but have not had the time to yet would be
 - Random number provider (seeding is more difficult than it seems and can be verbose)
