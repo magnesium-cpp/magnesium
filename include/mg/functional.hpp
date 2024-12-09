@@ -1,8 +1,13 @@
 #pragma once
 
+#include "detail/function_traits.hpp"
 #include "detail/iter_n.hpp"
+#include "sequence.hpp"
+#include "types.hpp"
 
 #include <cstdlib>
+#include <functional>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -11,7 +16,9 @@ namespace mg
     /// <summary>
     /// A perfectly forwarded functor wrapper around a callable which can be stored in a template.
     /// Supported examples would include function pointers, references, capture-less lambdas,
-    /// constexpr functor objects, etc.
+    /// constexpr functor objects, member function pointers, member pointers, etc. The calling
+    /// semantics are the same as those of std::invoke, which means that wrapped member (function) 
+    /// pointers are more flexible than would otherwise appear by raw syntax.
     /// </summary>
     /// <typeparam name="Fn">The callable value to wrap.</typeparam>
     template <auto Fn>
@@ -26,8 +33,71 @@ namespace mg
                         decltype(Fn),
                         Ts&&...>)
         {
-            return Fn(std::forward<Ts>(p_ts)...);
+            return std::invoke(Fn, std::forward<Ts>(p_ts)...);
         }
+    };
+
+    /// <summary>
+    /// A perfectly forwarded functor wrapper which handles functions with default arguments. In
+    /// general, these need to be provided when calling a function via an opaque handle which can
+    /// be done in the same framework by having providers which return the value to use. The
+    /// values returned by these providers are appended to the parameter set passed into the
+    /// callable operator, and should function as one would expect.
+    ///
+    /// Since default parameters in general are static, unchanging, and not dynamic (i.e. it is
+    /// static code), the providers are required to be default constructible and also will be called
+    /// for every invocation (just like normal default parameters).
+    /// </summary>
+    /// <typeparam name="Fn">The callable type that is being wrapped.</typeparam>
+    /// <typeparam name="...DefaultProviders">The types of the providers.</typeparam>
+    template <auto Fn, typename... DefaultProviders>
+    struct func_with_defaults
+    {
+        /// <summary>
+        /// Create the callable, default constructing all the providers.
+        /// </summary>
+        func_with_defaults()
+            : m_providers(DefaultProviders()...)
+        {}
+
+        template <typename... Ts>
+        decltype(auto)
+            operator()(Ts&&... p_ts)
+            const
+            noexcept(mg::is_nothrow_applyable_v<
+                decltype(Fn),
+                typename mg::concat<
+                    mg::type_sequence<Ts&&...>,
+                    mg::slice<
+                        mg::type_sequence<std::invoke_result_t<DefaultProviders>...>,
+                        default_offset(sizeof...(Ts)),
+                        std::tuple_size_v<std::tuple<DefaultProviders...>>>>::as_tuple>)
+        {
+            auto impl = [&]<std::size_t... Is, typename... Inners>(std::index_sequence<Is...>, Inners&&... p_inners)
+            {
+                return std::invoke(Fn, std::forward<Inners>(p_inners)..., std::get<Is>(m_providers)()...);
+            };
+
+            return impl(
+                make_index_offset_sequence<
+                    default_offset(sizeof...(p_ts)),
+                    std::tuple_size_v<decltype(m_providers)>>{},
+                std::forward<Ts>(p_ts)...);
+        }
+
+    private:
+        static constexpr std::size_t default_offset(std::size_t p_paramCount)
+        {
+            auto minimum_param_count = detail::function_traits<decltype(Fn)>::calling_arity - sizeof...(DefaultProviders);
+            auto default_offset = p_paramCount - minimum_param_count;
+
+            return default_offset;
+        }
+
+        /// <summary>
+        /// The objects which will provide default parameter values.
+        /// </summary>
+        std::tuple<DefaultProviders...> m_providers;
     };
 
     /// <summary>

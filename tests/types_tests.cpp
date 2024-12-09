@@ -24,3 +24,13 @@ TEST(is_instance, multi) {
     EXPECT_TRUE((mg::is_instance_v<MultiTemplate<int, float>, MultiTemplate>));
     EXPECT_FALSE((mg::is_instance_v<std::tuple<int, float>, MultiTemplate>));
 }
+
+TEST(is_applyable, basic) {
+    struct Functor
+    {
+        void operator()(int, double, int) {}
+    };
+
+    EXPECT_TRUE((mg::is_applyable_v<Functor, std::tuple<int, double, int>>));
+    EXPECT_TRUE((mg::is_applyable_v<Functor, std::tuple<const int&, double&&, int>>));
+}
