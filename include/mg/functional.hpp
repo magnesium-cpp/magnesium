@@ -166,7 +166,7 @@ namespace mg
         template <typename FnArg = Fn, typename MapArg = Map>
         map_args(FnArg&& p_fnArg = FnArg{}, MapArg&& p_mapArg = MapArg{})
             : Fn(std::forward<FnArg>(p_fnArg)),
-            Map(std::forward<MapArg>(p_mapArg))
+              Map(std::forward<MapArg>(p_mapArg))
         {
         }
 
