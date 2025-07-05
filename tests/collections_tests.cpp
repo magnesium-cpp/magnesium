@@ -3,7 +3,11 @@
 
 #include <mg/collections.hpp>
 
+#include <array>
 #include <functional>
+#include <list>
+#include <span>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -107,4 +111,44 @@ TEST(tuple_map, moved_into) {
         [](Helper helper) { return helper.m_moveConstructedInto; });
 
     EXPECT_EQ(moved_into, std::make_tuple(false, false, true, true));
+}
+
+TEST(all_unique, empty) {
+    std::array<int, 0> arr{};
+    EXPECT_TRUE(mg::all_unique(std::begin(arr), std::end(arr)));
+}
+
+TEST(all_unique, single) {
+    std::array arr{1};
+    EXPECT_TRUE(mg::all_unique(std::begin(arr), std::end(arr)));
+}
+
+TEST(all_unique, duplicates) {
+    std::array arr1{ 0, 1, 2, 3, 4, 0 };
+    EXPECT_FALSE(mg::all_unique(std::begin(arr1), std::end(arr1)));
+
+    std::array arr2{ 0, 1, 2, 3, 4, 4 };
+    EXPECT_FALSE(mg::all_unique(std::begin(arr2), std::end(arr2)));
+
+    std::vector vec1{ 1, 2, 3, -1, -2, -3, 3 };
+    EXPECT_FALSE(mg::all_unique(std::begin(vec1), std::end(vec1)));
+
+    std::list l{ 0, 1, 0 };
+    EXPECT_FALSE(mg::all_unique(std::begin(l), std::end(l)));
+
+    int cArr[]{ 0, 1, 2, 1 };
+    EXPECT_FALSE(mg::all_unique(std::begin(cArr), std::end(cArr)));
+}
+
+template <typename T>
+concept has_all_unique = requires(T& a) {
+	mg::all_unique(std::begin(a), std::end(a));
+};
+
+TEST(all_unique, valid_containers) {
+    static_assert(!has_all_unique<std::vector<bool>>);
+    static_assert(has_all_unique<std::vector<int>>);
+    static_assert(has_all_unique<std::string>);
+    static_assert(has_all_unique<int[3]>);
+    static_assert(has_all_unique<std::span<float>>);
 }

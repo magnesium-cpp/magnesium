@@ -148,4 +148,33 @@ namespace mg
 
         detail::iter_n<Stride>{}(std::forward<Fn>(p_fn), std::forward<Ts>(p_ts)...);
     }
+
+
+    /// <summary>
+    /// Wraps a given function with an argument mapper which will effectively inject itself between
+    /// the top level call and the primary function for all arguments.
+    ///
+    /// For example a function of type mg::map_args<std::less<>, mg::deref>, will call the
+    /// dereference operator on all arguments provided, allowing for this to work directly
+    /// on pointer types.
+    /// </summary>
+    /// <typeparam name="Fn">The function whose arguments are being wrapped.</typeparam>
+    /// <typeparam name="Map">The mapping function to apply to all provided parameters.</typeparam>
+    template <typename Fn, typename Map>
+    struct map_args : private Fn, private Map
+    {
+        template <typename FnArg = Fn, typename MapArg = Map>
+        map_args(FnArg&& p_fnArg = FnArg{}, MapArg&& p_mapArg = MapArg{})
+            : Fn(std::forward<FnArg>(p_fnArg)),
+            Map(std::forward<MapArg>(p_mapArg))
+        {
+        }
+
+        template <typename... Ts>
+        decltype(auto) operator()(Ts&&... p_ts) const
+        {
+            return Fn::operator()(Map::operator()(std::forward<Ts>(p_ts))...);
+        }
+    };
+
 }
