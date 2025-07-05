@@ -13,6 +13,7 @@ set(SRC_LIST
     "collections_tests.cpp"
     "functional_tests.cpp"
     "math_tests.cpp"
+    "sequence_tests.cpp"
     "types_tests.cpp")
 
 add_executable(magnesium_test ${SRC_LIST})

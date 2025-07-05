@@ -1,12 +1,13 @@
 #include <gtest/gtest.h>
 
 #include <mg/functional.hpp>
+#include <mg/detail/function_traits.hpp>
 
 #include <string>
 
 std::string concat(std::string pre, std::string post)
 {
-	return pre + post;
+    return pre + post;
 }
 
 TEST(func, basic) {
@@ -15,6 +16,41 @@ TEST(func, basic) {
     EXPECT_EQ(meaninglessFuncWrapper(), std::string("test_lambda"));
 
     EXPECT_EQ(mg::func<concat>{}("hello ", "world"), std::string("hello world"));
+
+}
+
+TEST(func, mem_fn) {
+    struct Integer
+    {
+        int Increment()
+        {
+            return ++val;
+        }
+
+        int Add(int x)
+        {
+            return (val += x);
+        }
+
+        int Decrement(int step = 1)
+        {
+            return (val -= step);
+        }
+
+        int val = 0;
+    };
+
+    Integer obj{};
+    auto incrementMemFn = mg::func<&Integer::Increment>();
+    ASSERT_EQ(incrementMemFn(obj), 1);
+    ASSERT_EQ(incrementMemFn(&obj), 2);
+
+    auto addMemFn = mg::func<&Integer::Add>();
+    ASSERT_EQ(addMemFn(obj, 2), 4);
+
+    auto decrementMemFn = mg::func_with_defaults<&Integer::Decrement, mg::constant_func<1>>();
+    ASSERT_EQ(decrementMemFn(obj), 3);
+    ASSERT_EQ(decrementMemFn(obj, 2), 1);
 }
 
 TEST(constant_func, fundamental_types) {
